@@ -1,4 +1,4 @@
-const { pool } = require('../config/db');
+// const { pool } = require('../config/db');
 const userModel = require('../models/user');
 // ============== GET DATA===================
 const GetAllUser = async (req, res) => {
@@ -13,7 +13,7 @@ const GetAllUser = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
-      message: ' CREATE DATA ERROR',
+      message: ' Data Not Yet',
       success: false,
       error: error,
       data: null,
@@ -24,7 +24,6 @@ const GetAllUser = async (req, res) => {
 const GetAllUserById = async (req, res) => {
   try {
     const id = req.params.id;
-
     const result = await userModel.GetDataUserById(id);
     const user = result.rows[0];
 

@@ -2,6 +2,7 @@ require('dotenv').config();
 const PORT = process.env.PORT;
 const express = require('express');
 const RouteUser = require('./route/user.js');
+const routeRecipe = require('./route/Routerecipe.js');
 const middlewares = require('./middleware/permission.js');
 const db = require('./config/db.js');
 
@@ -23,6 +24,7 @@ app.get('/api/v1/', (req, res) => {
 });
 
 //user endpoint
+app.use('/api/v1/recipe', routeRecipe);
 app.use('/api/v1/user', RouteUser);
 
 app.listen(PORT, () => {
