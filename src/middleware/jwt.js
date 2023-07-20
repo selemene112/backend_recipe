@@ -2,9 +2,14 @@ const jwt = require('jsonwebtoken');
 const secretKey = 'secretKey123';
 
 const VertifikasiToken = (req, res, next) => {
-  //   console.log(req.header);
-  //   console.log(token);
   const generateToken = req.header('Authorization');
+  if (!generateToken) {
+    return res.status(401).json({
+      success: false,
+      message: 'Input Token First',
+    });
+  }
+
   const token = generateToken.split(' ')[1];
 
   if (!token) {
@@ -20,6 +25,7 @@ const VertifikasiToken = (req, res, next) => {
     req.id = decoded.id;
     next();
   } catch (error) {
+    // console.log(error);
     return res.status(401).json({
       success: false,
       message: 'Invalid token',
@@ -27,28 +33,27 @@ const VertifikasiToken = (req, res, next) => {
   }
 };
 
-const generateToken = (req, res) => {
-  const { id } = req;
+// const generateToken = (req, res) => {
+//   const { id } = req;
 
-  try {
-    // Buat token dengan payload berisi ID pengguna
-    const token = jwt.sign({ id }, secretKey, { expiresIn: '1h' });
+//   try {
+//     // Buat token dengan payload berisi ID pengguna
+//     const token = jwt.sign({ id }, secretKey, { expiresIn: '1h' });
 
-    res.status(200).json({
-      success: true,
-      message: 'Token generated successfully',
-      token: token,
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error generating token',
-      error: error.message,
-    });
-  }
-};
+//     res.status(200).json({
+//       success: true,
+//       message: 'Token generated successfully',
+//       token: token,
+//     });
+//   } catch (error) {
+//     res.status(500).json({
+//       success: false,
+//       message: 'Error generating token',
+//       error: error.message,
+//     });
+//   }
+// };
 
 module.exports = {
   VertifikasiToken,
-  generateToken,
 };
