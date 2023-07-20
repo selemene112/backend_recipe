@@ -1,5 +1,10 @@
 // const { pool } = require('../config/db');
 const userModel = require('../models/user');
+const jwt = require('jsonwebtoken');
+const secretKey = 'secretKey123';
+//========================= Import
+//======
+//=====
 // ============== GET DATA===================
 const GetAllUser = async (req, res) => {
   try {
@@ -118,6 +123,32 @@ const DeleteUser = async (req, res) => {
   }
 };
 
+//================== Login ===================
+
+const LoginUserController = async (req, res) => {
+  const bodyquery = req.body.username;
+  console.log(req.body.username);
+  const { id } = req;
+  const token = jwt.sign({ id }, secretKey, { expiresIn: '1h' });
+  try {
+    await userModel.LoginUserwithAuth(bodyquery);
+    res.status(201).json({
+      message: 'Login Data Succes',
+      success: true,
+      error: null,
+      username: bodyquery,
+      token: token,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: ' Login Error ',
+      success: false,
+      error: error.message,
+      data: null,
+    });
+  }
+};
+
 //================ EXPORT DATA==================
 module.exports = {
   GetAllUser,
@@ -125,4 +156,5 @@ module.exports = {
   UpdateUser,
   DeleteUser,
   GetAllUserById,
+  LoginUserController,
 };
