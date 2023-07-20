@@ -5,6 +5,7 @@ const RouteUser = require('./route/user.js');
 const routeRecipe = require('./route/Routerecipe.js');
 const middlewares = require('./middleware/permission.js');
 const db = require('./config/db.js');
+const routeCategory = require('./route/RouteCategory.js');
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.get('/api/v1/', (req, res) => {
 //user endpoint
 app.use('/api/v1/recipe', routeRecipe);
 app.use('/api/v1/user', RouteUser);
+app.use('/api/v1/category', routeCategory);
 
 app.listen(PORT, () => {
   console.log(`Server Running On Port '${PORT}'`);
