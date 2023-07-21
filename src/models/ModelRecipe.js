@@ -8,7 +8,7 @@ const GetdataRecipe = () => {
 };
 //================================================================== Get by id =====================
 
-const GetRecipebyId = (id) => {
+const GetRecipebyId1 = (id) => {
   const sqlbyidRecipe = ' SELECT * FROM recipe WHERE id = $1 ';
   const values = [id];
 
@@ -40,13 +40,62 @@ const DeleteRecipebyId = (id) => {
 
   return pool.query(sqlDeleteRecipe, values);
 };
+//============================================ Search by name==============================
+
+const SearchByname = (body) => {
+  const sqlSearchByname = 'SELECT * FROM recipe WHERE title = $1';
+  const values = [body.title];
+
+  return pool.query(sqlSearchByname, values);
+};
+
+//============================================= Sort and pagnation ==============================
+
+const getRecipe = async (data) => {
+  const { search, searchBy, offset, limit } = data;
+  console.log('model getRecipe', search, searchBy, offset, limit);
+  try {
+    const result = await pool.query(
+      `SELECT recipe.id, recipe.title, recipe.ingredients, recipe.photo, category.name AS category
+    FROM recipe
+    JOIN category ON recipe.category = category.name
+    WHERE ${searchBy} ILIKE $1
+    LIMIT $2
+    OFFSET $3`,
+      [`%${search}%`, limit, offset]
+    );
+    return result;
+  } catch (err) {
+    throw err;
+  }
+};
+
+const getRecipeCount = async (data) => {
+  const { search, searchBy } = data;
+  console.log('model getRecipeCount', search, searchBy);
+  try {
+    const result = await pool.query(
+      `SELECT recipe.id, recipe.title, recipe.ingredients, recipe.photo, category.name AS category
+    FROM recipe
+    JOIN category ON recipe.category = category.name
+    WHERE ${searchBy} ILIKE $1`,
+      [`%${search}%`]
+    );
+    return result;
+  } catch (err) {
+    throw err; // Tambahkan try-catch dan lempar kesalahan dengan throw
+  }
+};
 
 //=================================================================== EXPORT ========================
 
 module.exports = {
   GetdataRecipe,
-  GetRecipebyId,
+  GetRecipebyId1,
   CreateRecipe,
   UpdateRecipebyID,
   DeleteRecipebyId,
+  SearchByname,
+  getRecipe,
+  getRecipeCount,
 };
