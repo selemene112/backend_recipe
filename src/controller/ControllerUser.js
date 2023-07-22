@@ -1,5 +1,6 @@
-// const { pool } = require('../config/db');
 const userModel = require('../models/user');
+const ValidasiUser = require('../validasi/validasiUser');
+//======================== JWT COMPONEN=================
 const jwt = require('jsonwebtoken');
 const secretKey = 'secretKey123';
 //========================= Import
@@ -58,10 +59,31 @@ const GetAllUserById = async (req, res) => {
 };
 //================ POST DATA=================
 const CreateDataUser = async (req, res) => {
-  console.log(req.body);
-
   const bodyquery = req.body;
+  const password = req.body.password;
+  const email = req.body.email;
+  //========================== Validasi Email ==============================
+
+  ValidasiUser.forEach((validation) => validation.run(req));
+
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  //========================== Validasi Password==============================
+  console.log(password);
+  if (!ValidasiUser.ValidasiPasswordUser(password, req, res)) {
+    return res.status(400).json({
+      success: false,
+      message: 'Password To Short ',
+
+      data: null,
+    });
+  }
+
   try {
+    // ValidasiUser.ValidasiPasswordUser(bodyquery);
     await userModel.CreateDatauser(bodyquery);
     res.status(201).json({
       message: ' CREATE DATA SECCUES',
@@ -126,12 +148,28 @@ const DeleteUser = async (req, res) => {
 //================== Login ===================
 
 const LoginUserController = async (req, res) => {
-  const bodyquery = req.body.username;
-  console.log(req.body.username);
-  const { id } = req;
-  const token = jwt.sign({ id }, secretKey, { expiresIn: '1h' });
+  const bodyquery = req.body;
+  const password = req.body.password;
+  const username = req.body.username;
+  // console.log(password);
+  // console.log(username);
+
+  const validateUser = await ValidasiUser.LoginUserwithAuth1(username, password);
+
+  if (!validateUser) {
+    return res.status(400).json({
+      success: false,
+      message: 'login failed',
+      data: null,
+    });
+  }
+
+  await userModel.LoginUserwithAuth(bodyquery);
+  console.log(req.body);
+
   try {
-    await userModel.LoginUserwithAuth(bodyquery);
+    const { id } = req;
+    const token = jwt.sign({ id }, secretKey, { expiresIn: '1h' });
     res.status(201).json({
       message: 'Login Data Succes',
       success: true,

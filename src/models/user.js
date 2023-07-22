@@ -2,7 +2,7 @@ const { pool } = require('../config/db');
 // ========================= Create
 
 const CreateDatauser = (body) => {
-  const querySQL = `INSERT INTO users (username, password) VALUES ('${body.password}','${body.username}')`;
+  const querySQL = `INSERT INTO users (username, password) VALUES ('${body.username}','${body.password}')`;
 
   return pool.query(querySQL);
 };
