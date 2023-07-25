@@ -1,5 +1,7 @@
 const userModel = require('../models/user');
 const ValidasiUser = require('../validasi/validasiUser');
+const hashPasswordMiddleware = require('../middleware/bcryptjs');
+const { pool } = require('../config/db');
 //======================== JWT COMPONEN=================
 const jwt = require('jsonwebtoken');
 const secretKey = 'secretKey123';
@@ -58,32 +60,12 @@ const GetAllUserById = async (req, res) => {
   }
 };
 //================ POST DATA=================
-const CreateDataUser = async (req, res) => {
+const CreateDataUser = async (req, res, next) => {
   const bodyquery = req.body;
   const password = req.body.password;
-  const email = req.body.email;
-  //========================== Validasi Email ==============================
-
-  ValidasiUser.forEach((validation) => validation.run(req));
-
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-
-  //========================== Validasi Password==============================
   console.log(password);
-  if (!ValidasiUser.ValidasiPasswordUser(password, req, res)) {
-    return res.status(400).json({
-      success: false,
-      message: 'Password To Short ',
-
-      data: null,
-    });
-  }
 
   try {
-    // ValidasiUser.ValidasiPasswordUser(bodyquery);
     await userModel.CreateDatauser(bodyquery);
     res.status(201).json({
       message: ' CREATE DATA SECCUES',
@@ -148,13 +130,17 @@ const DeleteUser = async (req, res) => {
 //================== Login ===================
 
 const LoginUserController = async (req, res) => {
+  console.log('ariyanda');
   const bodyquery = req.body;
+  console.log(bodyquery);
+  console.log('ariyanda');
   const password = req.body.password;
   const username = req.body.username;
-  // console.log(password);
-  // console.log(username);
+  // const LoginUserQuerySql = 'SELECT * FROM users WHERE username = $1';
 
   const validateUser = await ValidasiUser.LoginUserwithAuth1(username, password);
+
+  // console.log(user);
 
   if (!validateUser) {
     return res.status(400).json({
@@ -164,12 +150,25 @@ const LoginUserController = async (req, res) => {
     });
   }
 
-  await userModel.LoginUserwithAuth(bodyquery);
-  console.log(req.body);
-
   try {
-    const { id } = req;
-    const token = jwt.sign({ id }, secretKey, { expiresIn: '1h' });
+    await userModel.LoginUserwithAuth(bodyquery);
+
+    //================================
+
+    const LoginUserQuerySql = 'SELECT * FROM users WHERE username = $1';
+    const values = [username];
+    console.log(LoginUserQuerySql);
+
+    const result = await pool.query(LoginUserQuerySql, values);
+
+    const user = result.rows[0];
+
+    console.log(user);
+
+    //==============================
+
+    const token = jwt.sign(user, secretKey, { expiresIn: '1h' });
+
     res.status(201).json({
       message: 'Login Data Succes',
       success: true,

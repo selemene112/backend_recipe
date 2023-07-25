@@ -10,7 +10,7 @@ routeRecipe.post('/', jwt.VertifikasiToken, RecipeController.CreateRecipe);
 routeRecipe.put('/:id', jwt.VertifikasiToken, RecipeController.UpdateRecipe);
 routeRecipe.delete('/:id', jwt.VertifikasiToken, RecipeController.DeleteRecipebyID);
 routeRecipe.get('/searchbyname/:title', jwt.VertifikasiToken, RecipeController.Searchbyname);
-routeRecipe.get('/user/la', jwt.VertifikasiToken, RecipeController.getDataDetail);
+routeRecipe.get('/user/la', RecipeController.getDataDetail);
 //================================= Export ===============================
 
 module.exports = routeRecipe;
