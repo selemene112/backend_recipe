@@ -1,5 +1,8 @@
-// const { pool } = require('../config/db');
 const userModel = require('../models/user');
+const ValidasiUser = require('../validasi/validasiUser');
+const hashPasswordMiddleware = require('../middleware/bcryptjs');
+const { pool } = require('../config/db');
+//======================== JWT COMPONEN=================
 const jwt = require('jsonwebtoken');
 const secretKey = 'secretKey123';
 //========================= Import
@@ -57,10 +60,11 @@ const GetAllUserById = async (req, res) => {
   }
 };
 //================ POST DATA=================
-const CreateDataUser = async (req, res) => {
-  console.log(req.body);
-
+const CreateDataUser = async (req, res, next) => {
   const bodyquery = req.body;
+  const password = req.body.password;
+  console.log(password);
+
   try {
     await userModel.CreateDatauser(bodyquery);
     res.status(201).json({
@@ -126,12 +130,45 @@ const DeleteUser = async (req, res) => {
 //================== Login ===================
 
 const LoginUserController = async (req, res) => {
-  const bodyquery = req.body.username;
-  console.log(req.body.username);
-  const { id } = req;
-  const token = jwt.sign({ id }, secretKey, { expiresIn: '1h' });
+  console.log('ariyanda');
+  const bodyquery = req.body;
+  console.log(bodyquery);
+  console.log('ariyanda');
+  const password = req.body.password;
+  const username = req.body.username;
+  // const LoginUserQuerySql = 'SELECT * FROM users WHERE username = $1';
+
+  const validateUser = await ValidasiUser.LoginUserwithAuth1(username, password);
+
+  // console.log(user);
+
+  if (!validateUser) {
+    return res.status(400).json({
+      success: false,
+      message: 'login failed',
+      data: null,
+    });
+  }
+
   try {
     await userModel.LoginUserwithAuth(bodyquery);
+
+    //================================
+
+    const LoginUserQuerySql = 'SELECT * FROM users WHERE username = $1';
+    const values = [username];
+    console.log(LoginUserQuerySql);
+
+    const result = await pool.query(LoginUserQuerySql, values);
+
+    const user = result.rows[0];
+
+    console.log(user);
+
+    //==============================
+
+    const token = jwt.sign(user, secretKey, { expiresIn: '1h' });
+
     res.status(201).json({
       message: 'Login Data Succes',
       success: true,
